@@ -1,11 +1,12 @@
-package mavmi.git;
+package mavmi.git.app;
 
+import mavmi.git.args.ArgsException;
+import mavmi.git.git.Git;
+import mavmi.git.args.Args;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.Set;
 
 @SpringBootApplication
 public class Main implements ApplicationRunner{
@@ -15,15 +16,11 @@ public class Main implements ApplicationRunner{
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        final String errMsg = "Invalid arguments`1\n" +
-                "Usage: java -jar git.jar --repos-list=[PATH_TO_REPOS_FILE] {--ssh-key=[PATH_TO_SSH_PUBLIC_KEY]}";
-
-        String reposFilePath, sshPublicKeyPath;
-        Set<String> argsNames = args.getOptionNames();
-        if (argsNames.contains("--repos-list")){
-            raiseError(errMsg);
-        } else {
-            
+        try {
+            Git git = new Git(new Args(args));
+            git.gitClone();
+        } catch (ArgsException e){
+            raiseError(e.getMessage());
         }
     }
 
