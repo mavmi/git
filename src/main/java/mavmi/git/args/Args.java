@@ -1,82 +1,83 @@
 package mavmi.git.args;
 
+import lombok.Getter;
 import org.springframework.boot.ApplicationArguments;
 
 import java.util.List;
 import java.util.Set;
 
+@Getter
 public class Args {
-    private static final String reposFileFlag = "repos-list";
-    private static final String usernameFlag = "username";
-    private static final String sshKeyFlag = "ssh-key";
-    private static final String outputDirFlag = "output-dir";
-    private static final String rmGitFlag = "rm-git";
-    private static final String errMsg = "Invalid arguments\n" +
-                                            "Usage: java -jar git.jar\n" +
-                                            "\t--" + reposFileFlag + "=[PATH_TO_REPOS_FILE]\n" +
-                                            "\t--" + usernameFlag + "=[GITHUB_USERNAME]\n" +
-                                            "\t{--" + sshKeyFlag + "=[PATH_TO_SSH_PRIVATE_KEY]}\n" +
-                                            "\t{--" + outputDirFlag + "=[OUTPUT_DIRECTORY_PATH]}\n" +
-                                            "\t{--" + rmGitFlag + "=[true/false]}";
+    private static final String REPOS_FILE_FLAG = "repos-list";
+    private static final String USERNAME_FLAG = "username";
+    private static final String SSH_KEY_FLAG = "ssh-key";
+    private static final String OUTPUT_DIR_FLAG = "output-dir";
+    private static final String RM_GIT_FLAG = "rm-git";
+    private static final String ERR_MSG = "Invalid arguments\n" +
+            "Usage: java -jar git.jar\n" +
+            "\t--" + REPOS_FILE_FLAG + "=[PATH_TO_REPOS_FILE]\n" +
+            "\t--" + USERNAME_FLAG + "=[GITHUB_USERNAME]\n" +
+            "\t{--" + SSH_KEY_FLAG + "=[PATH_TO_SSH_PRIVATE_KEY]}\n" +
+            "\t{--" + OUTPUT_DIR_FLAG + "=[OUTPUT_DIRECTORY_PATH]}\n" +
+            "\t{--" + RM_GIT_FLAG + "=[true/false]}";
 
     private final String reposFile;
     private final String username;
     private final String sshKey;
     private final String outputDir;
-    private final boolean rmGit;
+    private final Boolean rmGit;
 
-    public Args(ApplicationArguments args){
+    public Args(ApplicationArguments args) {
         final Set<String> optionNames = args.getOptionNames();
         final List<String> nonOptionArgs = args.getNonOptionArgs();
 
-        if (nonOptionArgs.size() != 0 || !optionNames.contains(reposFileFlag) || !optionNames.contains(usernameFlag)){
-            throw new ArgsException(errMsg);
+        if (!nonOptionArgs.isEmpty() || !optionNames.contains(REPOS_FILE_FLAG) || !optionNames.contains(USERNAME_FLAG)) {
+            throw new ArgsException(ERR_MSG);
         }
 
         {
-            List<String> optionValues = args.getOptionValues(reposFileFlag);
-            if (optionValues == null || optionValues.size() != 1) throw new ArgsException(errMsg);
+            List<String> optionValues = args.getOptionValues(REPOS_FILE_FLAG);
+            if (optionValues == null || optionValues.size() != 1) {
+                throw new ArgsException(ERR_MSG);
+            }
             reposFile = optionValues.get(0);
         }
         {
-            List<String> optionValues = args.getOptionValues(usernameFlag);
-            if (optionValues == null || optionValues.size() != 1) throw new ArgsException(errMsg);
+            List<String> optionValues = args.getOptionValues(USERNAME_FLAG);
+            if (optionValues == null || optionValues.size() != 1) {
+                throw new ArgsException(ERR_MSG);
+            }
             username = optionValues.get(0);
         }
         {
-            List<String> optionValues = args.getOptionValues(sshKeyFlag);
-            if (optionValues == null || optionValues.size() == 0) sshKey = System.getProperty("user.home") + "/.ssh/id_ecdsa";
-            else if (optionValues.size() > 1) throw new ArgsException(errMsg);
-            else sshKey = optionValues.get(0);
+            List<String> optionValues = args.getOptionValues(SSH_KEY_FLAG);
+            if (optionValues == null || optionValues.isEmpty()) {
+                sshKey = System.getProperty("user.home") + "/.ssh/id_ecdsa";
+            } else if (optionValues.size() > 1) {
+                throw new ArgsException(ERR_MSG);
+            } else {
+                sshKey = optionValues.get(0);
+            }
         }
         {
-            List<String> optionValues = args.getOptionValues(outputDirFlag);
-            if (optionValues == null || optionValues.size() == 0) outputDir = System.getProperty("user.home") + "/GitCloneOutput";
-            else if (optionValues.size() > 1) throw new ArgsException(errMsg);
-            else outputDir = optionValues.get(0);
+            List<String> optionValues = args.getOptionValues(OUTPUT_DIR_FLAG);
+            if (optionValues == null || optionValues.isEmpty()) {
+                outputDir = System.getProperty("user.home") + "/GitCloneOutput";
+            } else if (optionValues.size() > 1) {
+                throw new ArgsException(ERR_MSG);
+            } else {
+                outputDir = optionValues.get(0);
+            }
         }
         {
-            List<String> optionValues = args.getOptionValues(rmGitFlag);
-            if (optionValues == null || optionValues.size() == 0) rmGit = true;
-            else if (optionValues.size() > 1) throw new ArgsException(errMsg);
-            else rmGit = Boolean.getBoolean(optionValues.get(0));
+            List<String> optionValues = args.getOptionValues(RM_GIT_FLAG);
+            if (optionValues == null || optionValues.isEmpty()) {
+                rmGit = true;
+            } else if (optionValues.size() > 1) {
+                throw new ArgsException(ERR_MSG);
+            } else {
+                rmGit = Boolean.getBoolean(optionValues.get(0));
+            }
         }
     }
-
-    public String getReposFile(){
-        return reposFile;
-    }
-    public String getUsername(){
-        return username;
-    }
-    public String getSshKey(){
-        return sshKey;
-    }
-    public String getOutputDir(){
-        return outputDir;
-    }
-    public boolean getRmGit(){
-        return rmGit;
-    }
-
 }

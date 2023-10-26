@@ -1,5 +1,8 @@
 package mavmi.git.git;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import mavmi.git.utils.Utils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 
@@ -7,38 +10,39 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class GitRepo {
-    final private Git parent;
+    private final Git parent;
+    private final List<String> branches = new ArrayList<>();
 
-    final private List<String> branches = new ArrayList<>();
+    @Getter
+    @Setter
     private String name;
 
-    public GitRepo(Git parent, String name){
+    public GitRepo(Git parent, String name) {
         this.parent = parent;
         this.name = name;
     }
 
-    public void gitClone(){
-        System.out.print(" > cloning repo: ");
-        System.out.println(name);
+    public void gitClone() {
+        log.info("Cloning repo {}", name);
 
         final String repoDirPath = parent.getWorkingDirectory().getAbsolutePath() + "/" + name;
         final File repoDir = new File(repoDirPath);
-        if (!repoDir.mkdir()) throw new GitException("Unable to create repo dir: \"" + repoDir + "\"");
+        if (!repoDir.mkdir()) {
+            throw new GitException("Unable to create repo dir: \"" + repoDir + "\"");
+        }
 
-        for (int i = 0; i < branches.size(); i++){
+        for (int i = 0; i < branches.size(); i++) {
             final String branchName = branches.get(i);
             final String branchGitRef = "refs/heads/" + branchName;
 
-            System.out.print("\tbranch: ");
-            System.out.println(branchName);
+            log.info("branch {}", branchName);
 
             final String branchDirPath = repoDirPath + "/" + branchName;
             final File branchDir = new File(branchDirPath);
             if (!branchDir.mkdir()) {
-                System.err.print("\tUnable to create branch dir: \"");
-                System.err.print(branchDir);
-                System.err.println("\"");
+                log.error("Unable to create branch dir {}", branchDir);
                 continue;
             }
 
@@ -50,36 +54,34 @@ public class GitRepo {
                         .setURI(getBranch(i))
                         .setBranchesToClone(List.of(branchGitRef))
                         .setBranch(branchGitRef)
-                        .call();
-                if (parent.getRmGit()) Utils.deleteDir(branchDirPath + "/.git");
+                        .call()
+                        .close();
+                if (parent.getRmGit()) {
+                    Utils.deleteDir(branchDirPath + "/.git");
+                }
             } catch (GitAPIException e) {
-                System.err.println(e.getMessage());
+                e.printStackTrace(System.err);
             }
         }
     }
 
-    public void setName(String name){
-        this.name = name;
-    }
-    public String getName(){
-        return name;
-    }
-
-    public void addBranch(String branch){
+    public void addBranch(String branch) {
         branches.add(branch);
     }
-    public String getBranchName(int pos){
+
+    public String getBranchName(int pos) {
         return branches.get(pos);
     }
-    public String getBranch(int pos){
-        if (parent.getConnectionType() == CONNECTION_TYPE.SSH){
+
+    public String getBranch(int pos) {
+        if (parent.getConnectionType() == CONNECTION_TYPE.SSH) {
             return "git@github.com:" + parent.getUsername() + "/" + name + ".git";
-        } else if (parent.getConnectionType() == CONNECTION_TYPE.HTTPS){
+        } else {
             return "https://github.com/" + parent.getUsername() + "/" + name + ".git";
         }
-        throw new GitException("Invalid protocol");
     }
-    public int getBranchesCount(){
+
+    public int getBranchesCount() {
         return branches.size();
     }
 
@@ -92,7 +94,7 @@ public class GitRepo {
                 .append(",\n")
                 .append("\tbranches list: [\n");
 
-        for (int i = 0; i < branches.size(); i++){
+        for (int i = 0; i < branches.size(); i++) {
             builder.append("\t\t");
             builder.append(branches.get(i));
             if (i + 1 != branches.size()) builder.append(",\n");
