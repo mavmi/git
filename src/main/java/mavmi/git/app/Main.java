@@ -15,18 +15,13 @@ public class Main implements ApplicationRunner{
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         try {
             Git git = new Git(new Args(args));
             git.gitClone();
         } catch (ArgsException e){
-            raiseError(e.getMessage());
+            e.printStackTrace(System.err);
         }
-    }
-
-    private void raiseError(String msg){
-        System.err.println(msg);
-        System.exit(1);
     }
 
 }
