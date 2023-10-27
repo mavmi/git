@@ -1,8 +1,11 @@
-package mavmi.git.git;
+package mavmi.git.git.entity;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import mavmi.git.args.Args;
+import mavmi.git.git.CONNECTION_TYPE;
+import mavmi.git.git.GitException;
+import mavmi.git.git.SshTransportConfigCallback;
 import mavmi.git.utils.Utils;
 
 import java.io.BufferedReader;
@@ -20,7 +23,7 @@ public class Git {
     private final String username;
     private final File workingDirectory;
     private final Boolean rmGit;
-    private final CONNECTION_TYPE connectionType = CONNECTION_TYPE.SSH;
+    private final CONNECTION_TYPE connectionType;
     private final List<GitRepo> reposList;
     private final SshTransportConfigCallback sshTransportConfigCallback;
 
@@ -29,6 +32,7 @@ public class Git {
         this.sshPrivateKeyPath = args.getSshKey();
         this.workingDirectory = new File(args.getOutputDir());
         this.rmGit = args.getRmGit();
+        this.connectionType = CONNECTION_TYPE.SSH;
         this.reposList = new ArrayList<>();
         this.sshTransportConfigCallback = new SshTransportConfigCallback(this.sshPrivateKeyPath);
 
@@ -67,7 +71,7 @@ public class Git {
                 List<String> parsedLine = split(line);
                 GitRepo gitRepo = new GitRepo(this, parsedLine.get(0));
                 for (int i = 1; i < parsedLine.size(); i++) {
-                    gitRepo.addBranch(parsedLine.get(i));
+                    gitRepo.addBranch(new GirBranch(this, gitRepo, parsedLine.get(i)));
                 }
 
                 reposList.add(gitRepo);

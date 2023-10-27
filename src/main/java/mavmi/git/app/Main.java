@@ -1,7 +1,7 @@
 package mavmi.git.app;
 
 import mavmi.git.args.ArgsException;
-import mavmi.git.git.Git;
+import mavmi.git.git.entity.Git;
 import mavmi.git.args.Args;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
